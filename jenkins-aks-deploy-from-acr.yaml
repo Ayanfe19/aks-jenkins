@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: my-springboot-app
-        image: ayanfeacr.azurecr.io/aksjenkins:latest
+        image: ayanfeacr.azurecr.io/ayanfeacr:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 8085
