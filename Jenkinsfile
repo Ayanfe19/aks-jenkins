@@ -1,44 +1,49 @@
+pipeline {
+    agent any
+    tools {
+        maven 'Maven'
+    }
 
-node {
-  
-  def image
-  def mvnHome = tool 'Maven3'
+    environment {
+        registryName = 'ayanfeacr'
+        registryCredential = 'ayanfeacr'
+        registryUrl = 'ayanfeacr.azurecr.io'
+        dockerImage = ''
+    }
 
-  
-     stage ('checkout') {
-        checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: '9ffd4ee4-3647-4a7d-a357-5e8746463282', url: 'https://bitbucket.org/ananthkannan/myawesomeangularapprepo/']]])       
-        }
-    
-    
-    stage ('Build') {
-            sh 'mvn -f MyAwesomeApp/pom.xml clean install'            
-        }
-        
-    stage ('archive') {
-            archiveArtifacts '**/*.jar'
-        }
-        
-    stage ('Docker Build') {
-         // Build and push image with Jenkins' docker-plugin
-        withDockerServer([uri: "tcp://localhost:4243"]) {
-
-            withDockerRegistry([credentialsId: "fa32f95a-2d3e-4c7b-8f34-11bcc0191d70", url: "https://index.docker.io/v1/"]) {
-            image = docker.build("ananthkannan/mywebapp", "MyAwesomeApp")
-            image.push()
-            
+    stages {
+        stage('Build') {
+            steps {
+                sh 'mvn clean install'
             }
         }
-    }
-    
-       stage('docker stop container') {
-            sh 'docker ps -f name=myContainer -q | xargs --no-run-if-empty docker container stop'
-            sh 'docker container ls -a -fname=myContainer -q | xargs -r docker container rm'
 
-       }
+        stage('Build Image') {
+            steps {
+                script {
+                    dockerImage = docker.build registryName
+                }
+            }
+        }
 
-    stage ('Docker run') {
+        stage('Upload Image to ACR') {
+            steps {
+                script {
+                    docker.withRegistry("http://${registryUrl}", registryCredential) {
+                        dockerImage.push()
+                    }
+                }
+            }
+        }
 
-        image.run("-p 8085:8085 --rm --name myContainer")
-
+        stage('K8S Deploy') {
+            steps {
+                script {
+                    withKubeConfig(caCertificate: '', clusterName: '', contextName: '', credentialsId: 'K8S', namespace: '', restrictKubeConfigAccess: false, serverUrl: '') {
+                        sh('kubectl apply -f jenkins-aks-deploy-from-acr.yaml')
+                    }
+                }
+            }
+        }
     }
 }
