@@ -6,7 +6,7 @@ pipeline {
 
     environment {
         registryName = 'ayanfeacr'
-        registryCredential = 'ayanfeacr'
+        registryCredential = 'acr-cred'
         registryUrl = 'ayanfeacr.azurecr.io'
         dockerImage = ''
     }
