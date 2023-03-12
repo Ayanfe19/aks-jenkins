@@ -101,6 +101,53 @@ az aks update -n aks-jenkins-cluster -g aks-jenkins-rg --attach-acr ayanfeacr
 ```
 
 
+Now that we are done with the pre-requisites let's setup the Jenkins Pipeline.
 
+
+### Step 1
+### Set up the Credentials
+There are 3 Crednetials we will be setting up for this Pipeline:
+1. GitHub Credentials
+2. ACR Credentials
+3. Kubernetes Config Credentitals
+
+To add Credentials to Jenkins, from the Dashboard **Manage Jenkins** >> **Manage Credentials** 
+
+On the Global Scope, add a credential.
+
+![Add Credentials in Jenkins]()
+
+For GitHub Credentials and ACR Credentials the process is similar.
+
+You can get your ACR Credentials from the 
+
+![Where to get your ACR Credentials]()
+
+For the Kubernetes Config Credentials, you can get the credentials from the CLI.
+
+
+```
+cat .kube/config > cluster-config
+```
+
+The command above sends the config credentials to a file, download it or copy the content to be used in your Jenkins Credentials
+
+Use the Secret File type of credential.
+
+![Set up K8S Config Credentials]()
+ 
+### Step 2
+### Create the Jenkins Pipeline
+
+### Step 3
+### Prepare the Kubernetes Manifest file
+
+
+### Step 4
+### Build the Pipeline
+
+
+### Step 5
+### Verify the Deployment
 
 
