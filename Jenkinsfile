@@ -5,7 +5,7 @@ pipeline {
     }
 
     environment {
-        registryName = 'ayanfeacr'
+        registryName = 'spring-boot-app'
         registryCredential = 'acr-cred'
         registryUrl = 'ayanfeacr.azurecr.io'
         dockerImage = ''
