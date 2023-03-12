@@ -21,6 +21,29 @@ For this, you will need an active Azure Subscription.
 
 You can use this [Azure Documentation for the setup.](https://learn.microsoft.com/en-us/azure/developer/jenkins/configure-on-linux-vm)
 
+Once you are done with the setup of the VM above. You need to ensure that Docker is available on this VM, and also that Jenkins have the proper access to use Docker.
+
+Connect to the Jenkins VM and use the script docker-setup.sh for this setup.
+
+```
+sudo apt update
+sudo apt install apt-transport-https ca-certificates curl software-properties-common
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable"
+sudo apt install docker-ce
+```
+
+Once Docker is installed. You want to ensure that Jenkins has permission to use docker
+
+```
+sudo groupadd docker
+sudo usermod -aG docker $USER
+```
+
+You can switch to the Jenkins user to be sure that Jenkins can now run docker commands.
+
+If your setup is for running Jenkins on a Docker Conatiner, simply ensure that your Dockerfile for the setup includes a script to install docker. See this [example](https://github.com/shazChaudhry/docker-jenkins/blob/ee0f386fd1706829b956cb2e723c0f2935496933/Dockerfile)
+
 
 ### 2. Setting up the Kubernetes Cluster
 
@@ -48,6 +71,35 @@ Since we've covered all that, here is the command for creating your AKS Cluster.
 ```
 az aks create -g aks-jenkins-rg -n aks-jenkins-cluster --enable-managed-identity --node-count 1 --enable-addons monitoring --enable-msi-auth-for-monitoring  --generate-ssh-keys
 ```
+
+You will need to use Kubectl to interact with your cluster. To configure Kubectl to connect to your cluster use the command below
+
+```
+az aks get-credentials --resource-group aks-jenkins-rg --name aks-jenkins-cluster
+```
+
+Then verify that you can access the cluster using:
+```
+kubectl get nodes
+```
+
+This should show exacly 1 node, since our cluster was configured to have just 1 node.
+
+
+### 3. Setting up the Azure Container Registry
+
+```
+az acr create — resource-group aks-jenkins-rg — name ayanfeacr — sku Standard — location eastus
+```
+
+You will need to integrate Azure Container Registry with Azure Kubernetes Service. The integration procedure will assign the AcrPull role to the Managed Identity of the Cluster.
+
+This is done using the command here:
+
+```
+az aks update -n aks-jenkins-cluster -g aks-jenkins-rg --attach-acr ayanfeacr 
+```
+
 
 
 
