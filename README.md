@@ -134,7 +134,7 @@ The command above sends the config credentials to a file, download it or copy th
 
 Use the Secret File type of credential.
 
-![Set up K8S Config Credentials]()
+![Set up K8S Config Credentials](https://github.com/Ayanfe19/aks-jenkins/blob/main/images/add-credentials-to-jenkins-2.png)
  
 ### Step 2
 ### Create the Jenkins Pipeline
